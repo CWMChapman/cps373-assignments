@@ -8,7 +8,7 @@ int main() {
 
   // Text Deserializer
   auto start = high_resolution_clock::now();
-  auto bakery = text_deserializer("../data/large.txt");
+  auto bakery = text_deserializer("../data/small.txt");
   auto deser_time = high_resolution_clock::now() - start;
   std::cout << "Text deserializer took: "
             << duration_cast<milliseconds>(deser_time).count() << "ms"
@@ -27,7 +27,7 @@ int main() {
             << std::endl;
   // print_bakery(bakery);
 
-  
+  /*
   //Binary Deserializer
   start = high_resolution_clock::now();
   bakery = binary_deserializer("../data/large.txt");
@@ -37,11 +37,13 @@ int main() {
             << std::endl
             << std::endl;
   // print_bakery(bakery);
+  */
 
   //Binary Serializer
   start = high_resolution_clock::now();
-  binary_serializer(bakery, "../data/binary_serialized.txt");
+  binary_serializer(bakery, "../data/binary_serialized_small.bin");
   deser_time = high_resolution_clock::now() - start;
+  binary_serializer(bakery, "../data/binary_serialized_large.txt");
   std::cout << "Binary serializer took: "
             << duration_cast<milliseconds>(deser_time).count() << "ms"
             << std::endl
@@ -52,15 +54,3 @@ int main() {
 
   return 0;
 }
-
-
-
-/*
-Questions:
-
-1. Am I storing the values correctly in binary deserialization?
-2. How do I 
-
-
-
-*/
