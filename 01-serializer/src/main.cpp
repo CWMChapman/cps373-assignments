@@ -30,7 +30,7 @@ int main() {
   /*
   //Binary Deserializer
   start = high_resolution_clock::now();
-  bakery = binary_deserializer("../data/large.txt");
+  bakery = binary_deserializer("../data/binar_serialized.bin");
   deser_time = high_resolution_clock::now() - start;
   std::cout << "Binary deserializer took: "
             << duration_cast<milliseconds>(deser_time).count() << "ms"
@@ -38,6 +38,7 @@ int main() {
             << std::endl;
   // print_bakery(bakery);
   */
+  
 
   //Binary Serializer
   start = high_resolution_clock::now();

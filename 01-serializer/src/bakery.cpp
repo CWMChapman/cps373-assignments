@@ -105,19 +105,19 @@ Bakery text_deserializer(std::string file_path) {
 // Hint: use print_bakery to help think about the text serializer
 void text_serializer(const Bakery& bakery, std::string file_path) {
   std::ofstream outfile (file_path);
-  outfile << "Employees: " << std::endl;
+  outfile << "@employees " << std::endl;
   for (auto employee : bakery.employees) {
     outfile << employee << std::endl;
   }
 
   outfile << std::endl;
-  outfile << "Items: " << std::endl;
+  outfile << "@items " << std::endl;
   for (auto item : bakery.items) {
     outfile << item.name << ", " << item.price << std::endl;
   }
 
   outfile << std::endl;
-  outfile << "Orders: " << std::endl;
+  outfile << "@orders " << std::endl;
   for (auto order : bakery.orders) {
     outfile << order.employee << ": ";
     auto j = 0;
@@ -136,10 +136,18 @@ void text_serializer(const Bakery& bakery, std::string file_path) {
 
 
 Bakery binary_deserializer(std::string file_path) {
-  std::ifstream infile(file_path);
+  std::ifstream infile;
   std::string line;
   Bakery bakery;
 
+  infile.open(file_path, std::ios::binary | std::ios::in);
+  char out;
+  infile.read(&out, sizeof(char));
+  std::cout << "out: " << out << std::endl;
+  
+  infile.close(); 
+
+/*
   while (!infile.eof()) {
     // Employees section
     if (line.compare("@employees") == 0) {
@@ -238,6 +246,7 @@ Bakery binary_deserializer(std::string file_path) {
 
     std::getline(infile, line);
   }
+  */
 
   return bakery;
 }
@@ -252,11 +261,10 @@ void binary_serializer(const Bakery& bakery, std::string file_path) {
   short employee_reference = 0;
   for (auto employee : bakery.employees) {
     employee_dict[employee] = employee_reference;
-    outfile.write(std::bitset<16>(employee_reference).to_string().c_str(), sizeof(short)); // first 2 bytes are the employee reference
-    outfile.write(std::bitset<16>(employee.length()).to_string().c_str(), sizeof(short)); // next 2 bytes is the length of the employees name 
-    for (int i = 0; i < employee.size(); ++i) {
-      outfile.write(std::bitset<8>(employee[i]).to_string().c_str(), sizeof(char));
-    }
+    short length = employee.length();
+    outfile.write(reinterpret_cast<char*>(&employee_reference), sizeof(short)); // first 2 bytes are the employee reference
+    outfile.write(reinterpret_cast<char*>(&length), sizeof(short)); // next 2 bytes is the length of the employees name 
+    outfile << employee;
     ++employee_reference; //increment the reference for the next employee
   }
 
@@ -264,24 +272,32 @@ void binary_serializer(const Bakery& bakery, std::string file_path) {
   short item_name_reference = 0;
   for (auto item : bakery.items) {
     item_name_dict[item.name] = item_name_reference;
-    outfile.write(std::bitset<16>(item_name_reference).to_string().c_str(), sizeof(short)); // first 2 bytes are the items name reference
-    outfile.write(std::bitset<16>(item.name.length()).to_string().c_str(), sizeof(short)); // next 2 bytes is the length of the item's name 
-    for (int i = 0; i < item.name.size(); ++i) {
-      outfile.write(std::bitset<8>(item.name[i]).to_string().c_str(), sizeof(char));
-    }
-
-    outfile.write(std::bitset<32>(std::stof(item.price)).to_string().c_str(), sizeof(float));// 4 bytes
+    short length = item.name.length();
+    outfile.write(reinterpret_cast<char*>(&item_name_reference), sizeof(short)); // first 2 bytes are the items name reference
+    outfile.write(reinterpret_cast<char*>(&length), sizeof(short)); // next 2 bytes is the length of the item's name 
+    // outfile.write(std::bitset<8>(item_name_reference).to_string().c_str(), sizeof(std::bitset<8>(item_name_reference).to_string().c_str())); // first 2 bytes are the items name reference
+    // outfile.write(std::bitset<8>(item.name.length()).to_string().c_str(), sizeof(std::bitset<8>(item.name.length()).to_string().c_str())); // next 2 bytes is the length of the item's name 
+    outfile << item.name;
+    // for (int i = 0; i < item.name.size(); ++i) {
+    //   outfile.write(std::bitset<8>(item.name[i]).to_string().c_str(), sizeof(std::bitset<8>(item.name[i]).to_string().c_str()));
+    // }
+    float price = std::stof(item.price);
+    outfile.write(reinterpret_cast<char*>(&price),sizeof(float)); // four bytes
+    // outfile.write(std::bitset<32>(std::stof(item.price)).to_string().c_str(), sizeof(std::bitset<32>(std::stof(item.price)).to_string().c_str()));// 4 bytes
     ++item_name_reference; //increment the reference for the next item
   }
 
   for (auto order : bakery.orders) {
-    outfile.write(std::bitset<16>(employee_dict[order.employee]).to_string().c_str(), sizeof(short));
+    // outfile.write(std::bitset<8>(employee_dict[order.employee]).to_string().c_str(), sizeof(std::bitset<8>(employee_dict[order.employee]).to_string().c_str()));
+    outfile.write(reinterpret_cast<char*>(&employee_dict[order.employee]), sizeof(short));
 
-    auto j = 0;
+    // auto j = 0;
     for (auto item : order.items) {
-      outfile.write(std::bitset<8>(item.second[0]).to_string().c_str(), sizeof(char)); //number of items -- we can index to 0 because its just a string of length 1, always will be between 1 and 10 
-      outfile.write(std::bitset<16>(item_name_dict[item.first]).to_string().c_str(), sizeof(short)); //name of the item
-      j++;
+      outfile.write(reinterpret_cast<char*>(&item.second),sizeof(char));
+      outfile.write(reinterpret_cast<char*>(&item.first),sizeof(char));
+      // outfile.write(std::bitset<8>(item.second[0]).to_string().c_str(), sizeof(std::bitset<8>(item.second[0]).to_string().c_str())); //number of items -- we can index to 0 because its just a string of length 1, always will be between 1 and 10 
+      // outfile.write(std::bitset<8>(item_name_dict[item.first]).to_string().c_str(), sizeof(std::bitset<8>(item_name_dict[item.first]).to_string().c_str())); //name of the item
+      // j++;
     }
   }
 
