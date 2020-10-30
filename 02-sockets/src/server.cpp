@@ -4,10 +4,22 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <bitset>
 
 #include "bakery.hpp"
 
 using asio::ip::tcp;
+
+
+std::string getBits( std::array<int,24>* message, int firstBit, int numBits ) {
+  // first bit must be using zero indexing
+  std::string bits;
+  for (int i = 0; i < numBits; ++i) {
+      bits += std::to_string((*message)[firstBit + i]);
+  }
+
+  return bits;
+}
 
 int main() {
   asio::io_context io_context;
@@ -15,22 +27,6 @@ int main() {
 
   // Use this bakery to handle queries from the client
   Bakery bakery = text_deserializer("../data/bakery.txt");
-  
-  std::map<std::string, std::string> employees;
-  employees = {
-        {"00","Brad"},
-        {"01","Claudia"},
-        {"10","Simone"},
-        {"11","NULL"}
-  };
-  std::map<std::string, std::string> items;
-  employees = {
-        {"q1","Biscuit"},
-        {"q2","Bun"},
-        {"q3","Brownie"},
-        {"q4","White Loaf"},
-        {"q4","Wheat Loaf"}
-  };
 
   uint16_t counter = 0;
   while (true) {
@@ -43,15 +39,8 @@ int main() {
     asio::error_code error;
     size_t len = socket.read_some(asio::buffer(buf), error);
 
-    // Example of error handling
-    // if (error != asio::error::eof)
-    //   throw asio::system_error(error);
-
-    // Add x to counter
-
 
     std::array<int, 24> message = {0};
-    // std::array<int, 24> message = {0};
 
     int buf_index = 0;
     int bit_index = 0;
@@ -71,23 +60,26 @@ int main() {
 
     uint16_t response;
     
-    std::string message_type = std::to_string(message[0]) + std::to_string(message[1]);
-    std::string employee_index = std::to_string(message[2]) + std::to_string(message[3]);
-    std::string q1 = std::to_string(message[4]) + std::to_string(5) + std::to_string(6) + std::to_string(7);    
-    std::string q2 = std::to_string(message[8]) + std::to_string(9) + std::to_string(11) + std::to_string(12);
-    std::string q3 = std::to_string(message[12]) + std::to_string(13) + std::to_string(14) + std::to_string(15);
-    std::string q4 = std::to_string(message[16]) + std::to_string(17) + std::to_string(18) + std::to_string(19);
-    std::string q5 = std::to_string(message[20]) + std::to_string(21) + std::to_string(22) + std::to_string(23);    
-    
-    // 00: Total number of orders 
+    std::string message_type = getBits(&message, 0, 2); 
+
+    // Message Type 00: Total number of orders 
     if (message_type == "00") {
       int num_orders = bakery.orders.size();
       response = num_orders;
     }
-    // 01: Total number of orders for employee
+    // Message Type 01: Total number of orders for employee
     else if (message_type == "01") {
-      // std::string s = ;
-      std::string employee = employees[employee_index];
+      std::string employee_index = getBits(&message, 2, 2);
+      std::string employee;
+      if (employee_index == "00")
+        employee = "Brad";
+      else if (employee_index == "01")
+        employee = "Claudia";
+      else if (employee_index == "10")
+        employee = "Simone";
+      else 
+        employee = "NULL";
+      
       int num_orders = 0;
       for (int i = 0; i < bakery.orders.size(); ++i) {
         if (bakery.orders[i].employee == employee) {
@@ -96,26 +88,50 @@ int main() {
       }
       response = num_orders;
     }
-    // 10: Add an order using E, Q1, Q2, Q3, Q4, and Q5.
+    // // Message Type 10: Add an order using E, Q1, Q2, Q3, Q4, and Q5.
     else if (message_type == "10") {
+      std::string employee_index = getBits(&message, 2, 2);
+      std::string q [5] = {getBits(&message, 4, 4), getBits(&message, 8, 4), getBits(&message, 12, 4), getBits(&message, 16, 4), getBits(&message, 20, 4)};
       Order order;
-      order.employee = employees[employee_index];
-      if ;
-      order.items.push_back(std::make_pair(,item[]));
+      if (employee_index == "00")
+        order.employee = "Brad";
+      else if (employee_index == "01")
+        order.employee = "Claudia";
+      else if (employee_index == "10")
+        order.employee = "Simone";
+      else 
+        order.employee = "NULL";
+      
+      std::string item;
+      for (int i = 0; i < sizeof(q)/sizeof(q[0]); ++i) { 
+      
+        if (q[i] != "0000") {
+          if (i == 0)
+            item = "Biscuit";
+          else if (i == 1)
+            item = "Bun";
+          else if (i == 2)
+            item = "Brownie";
+          else if (i == 3)
+            item = "White Loaf";
+          else if (i == 4)
+            item = "Wheat Loaf";
+          std::string bin(q[i]);
+          order.items.push_back(std::make_pair(bin, item));
+        }
+        else {
+          continue;
+        }
+      }
+      bakery.orders.push_back(order);
+      response = 0; // not necessary, but it makes the code more readable
     }
     else {
       // This option (11) is invaild.
      }
 
-    // auto x = uint8_t(buf[0]);
-    // std::cout << "counter: " << counter << std::endl;
-    // std::cout << "x: " << x << std::endl;
-    // counter += x;
-    // std::cout << +x << " " << counter << std::endl;
-
-    // buf.fill(0);
-
-    std::memcpy(&response, &counter, sizeof(uint16_t));
+    std::cout << "Response: " << response << std::endl;
+    std::memcpy(&buf, &response, sizeof(uint16_t));
 
     asio::write(socket, asio::buffer(buf), error);
   }
