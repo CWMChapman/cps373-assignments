@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Files 
+.DS_Store
+.vscode
+./01-serializer/build/CMakeCache.txt ./01-serializer/build/CMakeFiles ./01-serializer/build/Makefile ./01-serializer/build/cmake_install.cmake ./01-serializer/build/main
+./02-sockets/build/CMakeCache.txt ./02-sockets/build/CMakeFiles ./02-sockets/build/Makefile ./02-sockets/build/client ./02-sockets/build/cmake_install.cmake ./02-sockets/build/server
