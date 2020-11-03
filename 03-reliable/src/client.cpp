@@ -1,5 +1,6 @@
 #include <asio.hpp>
 #include <iostream>
+#include <fstream>
 #include "../include/sender.hpp"
 #include <queue>
 
@@ -19,7 +20,6 @@ int main() {
   int32_t curr_msg = 0;
 
   std::array<std::string, NUM_MSGS> message = {""};
-  std::array<int, NUM_MSGS> message_w_ids = {-1};
   int queue_pop_counter = 0;
   int while_counter = 0;
   while (true) {
@@ -50,10 +50,9 @@ int main() {
       if(message[msg.msg_id].empty()) {
         message[msg.msg_id] = data_str;
         message_counter++;
-        message_w_ids[msg.msg_id] = msg.msg_id;
       }
-      
     }
+    
     else {
       while(!q.empty() && !message[q.front()].empty() ) {
         q.pop();
@@ -72,12 +71,16 @@ int main() {
     while_counter++;
   }
 
-  for (int i = 0; i < curr_msg; i++) {
-    std::cout << message_w_ids[i] << " ";
-  }
-  std::cout << std::endl;
-
   std::cout << "queue pop counter is: " << queue_pop_counter << std::endl;
+
+  std::ofstream outfile ("../data/poem.txt");
+  std::cout << std::endl;
+  for (int i = 0; i < curr_msg; i++) {
+    outfile << message[i];
+  }
+  outfile << std::endl;
+  outfile.close();
+
   
 
   return 0;
