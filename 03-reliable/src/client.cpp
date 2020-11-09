@@ -25,6 +25,14 @@ int main() {
 
   auto start = sc::high_resolution_clock::now();
   while (true) {
+    // if (curr_msg < NUM_MSGS) {
+    //   sender.request_msg(curr_msg);
+    //   auto hb = sc::duration_cast<sc::milliseconds>(sc::high_resolution_clock::now().time_since_epoch());
+    //   hb += sc::milliseconds(500);
+    //   timeout.push(hb);
+    //   q.push(curr_msg);
+    //   curr_msg++;
+    // }
     if (q.size() < 10 && curr_msg < NUM_MSGS){ 
       int c = curr_msg;
       if (c + 20 <= NUM_MSGS) {
@@ -50,6 +58,7 @@ int main() {
     }
 
     std::cout << "While counter: " << while_counter << ", # of packets re-requested: " << rerequest_counter << ", message_counter: " << message_counter << ", curr_msg: " << curr_msg << ", size of queue: " << q.size() << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     while (sender.data_ready()) {
       auto msg = sender.get_msg();
@@ -84,7 +93,6 @@ int main() {
     if (NUM_MSGS == curr_msg && NUM_MSGS == message_counter)
       break;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
   auto deser_time = sc::high_resolution_clock::now() - start;
 
