@@ -1,0 +1,15 @@
+Client-Server Topology:
+This time of this topology is roughly 1000 seconds makes sense to me. In this setup, we are trying to get to the center node,
+which in this case is the server from clients that are one hop away. The hops, in each case take 1000ms. 
+Since we arent worried about router bandwidth, and each message takes the same time, the total run time must be at least 1000 ms.
+
+
+Ring Topology:
+The longest message (which is therefore the time it takes for all messages to be received because we arent worried about router bandwidth)
+is from R6 to R7, because it must go all the way around the ring to reach 7 (because of the extremely weighty edge). It must make seven hops, 7*100 = 700 ms, 
+so therefore the time must be at least 700ms. Depending on the router's message queue, it takes roughly 800 ms.
+
+
+Complex Topology:
+The longest message takes 2300 ms. This is the message from router 4 to router 5. This means that the total time for the complex topology must be at least 2300 ms, which it is. 
+Because of the routers message queue, it takes roughly 2400ms. 

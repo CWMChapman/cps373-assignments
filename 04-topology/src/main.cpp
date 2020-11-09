@@ -7,6 +7,7 @@
 #include "../include/router.hpp"
 
 void client_server() {
+  
   Manager manager;
   Router r1(1, &manager, {{2, 1000}, {3, 1000}, {4, 1000}, {5, 1000}});
   Router r2(2, &manager, {{1, 1000}});
@@ -26,6 +27,7 @@ void client_server() {
   manager.routers.push_back(r4);
   manager.routers.push_back(r5);
 
+  auto start = std::chrono::high_resolution_clock::now();
   // messages
   manager.add_message(2, 1);
   manager.add_message(5, 1);
@@ -34,6 +36,11 @@ void client_server() {
   while (!manager.finished()) {
     manager.tick();
   }
+  auto deser_time = std::chrono::high_resolution_clock::now() - start;
+  std::cout << "Client-Server Topology Time: "
+              << duration_cast<milliseconds>(deser_time).count() << "ms"
+              << std::endl
+              << std::endl;
   
   return;
 }
@@ -67,6 +74,8 @@ void ring() {
   manager.routers.push_back(r7);
   manager.routers.push_back(r8);
 
+
+  auto start = std::chrono::high_resolution_clock::now();
   // messages
   manager.add_message(1, 3);
   manager.add_message(8, 4);
@@ -75,7 +84,11 @@ void ring() {
   while (!manager.finished()) {
     manager.tick();
   }
-
+  auto deser_time = std::chrono::high_resolution_clock::now() - start;
+  std::cout << "Client-Server Topology Time: "
+              << duration_cast<milliseconds>(deser_time).count() << "ms"
+              << std::endl
+              << std::endl;
   return;
 }
 
@@ -92,14 +105,14 @@ void complex() {
   Router r9(9, &manager, {{6, 200}, {8, 400}});
 
   r1.set_forwarding_tables({{2, 2}, {3, 2}, {4, 2}, {5, 5}, {6, 5}, {7, 2}, {8, 2}, {9, 5}});
-  r2.set_forwarding_tables({{1, }, {3, }, {4, }, {5, }, {6, }, {7, }, {8, }, {9, }});
-  r3.set_forwarding_tables({{1, }, {2, }, {4, }, {5, }, {6, }, {7, }, {8, }, {9, }});
-  r4.set_forwarding_tables({{1, }, {2, }, {3, }, {5, }, {6, }, {7, }, {8, }, {9, }});
-  r5.set_forwarding_tables({{1, }, {2, }, {3, }, {4, }, {6, }, {7, }, {8, }, {9, }});
-  r6.set_forwarding_tables({{1, }, {2, }, {3, }, {4, }, {5, }, {7, }, {8, }, {9, }});
-  r7.set_forwarding_tables({{1, }, {2, }, {3, }, {4, }, {5, }, {6, }, {8, }, {9, }});
-  r8.set_forwarding_tables({{1, }, {2, }, {3, }, {4, }, {5, }, {6, }, {7, }, {9, }});
-  r9.set_forwarding_tables({{1, }, {2, }, {3, }, {4, }, {5, }, {6, }, {7, }, {8, }});
+  r2.set_forwarding_tables({{1, 1}, {3, 3}, {4, 7}, {5, 1}, {6, 1}, {7, 7}, {8, 3}, {9, 3}});
+  r3.set_forwarding_tables({{1, 2}, {2, 2}, {4, 2}, {5, 6}, {6, 6}, {7, 7}, {8, 8}, {9, 8}});
+  r4.set_forwarding_tables({{1, 7}, {2, 7}, {3, 7}, {5, 7}, {6, 7}, {7, 7}, {8, 7}, {9, 7}});
+  r5.set_forwarding_tables({{1, 1}, {2, 1}, {3, 6}, {4, 1}, {6, 6}, {7, 1}, {8, 6}, {9, 6}});
+  r6.set_forwarding_tables({{1, 5}, {2, 5}, {3, 3}, {4, 5}, {5, 5}, {7, 5}, {8, 9}, {9, 9}});
+  r7.set_forwarding_tables({{1, 2}, {2, 2}, {3, 2}, {4, 4}, {5, 2}, {6, 2}, {8, 2}, {9, 2}});
+  r8.set_forwarding_tables({{1, 3}, {2, 3}, {3, 3}, {4, 3}, {5, 9}, {6, 9}, {7, 3}, {9, 9}});
+  r9.set_forwarding_tables({{1, 6}, {2, 8}, {3, 8}, {4, 8}, {5, 6}, {6, 6}, {7, 8}, {8, 8}});
 
   manager.routers.push_back(r1);
   manager.routers.push_back(r2);
@@ -111,6 +124,8 @@ void complex() {
   manager.routers.push_back(r8);
   manager.routers.push_back(r9);
 
+
+  auto start = std::chrono::high_resolution_clock::now();
   // messages
   manager.add_message(8, 6);
   manager.add_message(1, 9);
@@ -119,6 +134,11 @@ void complex() {
   while (!manager.finished()) {
     manager.tick();
   }
+  auto deser_time = std::chrono::high_resolution_clock::now() - start;
+  std::cout << "Client-Server Topology Time: "
+              << duration_cast<milliseconds>(deser_time).count() << "ms"
+              << std::endl
+              << std::endl;
   return;
 }
 
@@ -127,43 +147,9 @@ void complex() {
 
 
 int main() {
-  auto start = std::chrono::high_resolution_clock::now();
   client_server();
-  auto deser_time = std::chrono::high_resolution_clock::now() - start;
-  std::cout << "Client-Server Topology Time: "
-              << duration_cast<milliseconds>(deser_time).count() << "ms"
-              << std::endl
-              << std::endl;
-              
-  start = std::chrono::high_resolution_clock::now();
   ring();
-  deser_time = std::chrono::high_resolution_clock::now() - start;
-  std::cout << "Client-Server Topology Time: "
-              << duration_cast<milliseconds>(deser_time).count() << "ms"
-              << std::endl
-              << std::endl;
-
-  start = std::chrono::high_resolution_clock::now();
   complex();
-  deser_time = std::chrono::high_resolution_clock::now() - start;
-  std::cout << "Client-Server Topology Time: "
-              << duration_cast<milliseconds>(deser_time).count() << "ms"
-              << std::endl
-              << std::endl;
-
-
-
-
-  /* TIMING CODE
-    auto start = high_resolution_clock::now();
-    auto bakery = text_deserializer("../data/large.txt");
-    auto deser_time = high_resolution_clock::now() - start;
-    std::cout << "Text deserializer took: "
-              << duration_cast<milliseconds>(deser_time).count() << "ms"
-              << std::endl
-              << std::endl;
-  */
-
 
   return 0;
 }
