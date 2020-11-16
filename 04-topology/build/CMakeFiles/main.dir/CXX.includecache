@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/cwmchapman/Documents/Franklin and Marshall/Networks/cps373-assignments/04-topology/include/manager.hpp
+vector
+-
+../include/router.hpp
+/Users/cwmchapman/Documents/Franklin and Marshall/Networks/cps373-assignments/04-topology/include/router.hpp
+
+/Users/cwmchapman/Documents/Franklin and Marshall/Networks/cps373-assignments/04-topology/include/router.hpp
+chrono
+-
+queue
+-
+unordered_map
+-
+
+/Users/cwmchapman/Documents/Franklin and Marshall/Networks/cps373-assignments/04-topology/src/main.cpp
+chrono
+-
+fstream
+-
+iostream
+-
+chrono
+-
+../include/manager.hpp
+/Users/cwmchapman/Documents/Franklin and Marshall/Networks/cps373-assignments/04-topology/include/manager.hpp
+../include/router.hpp
+/Users/cwmchapman/Documents/Franklin and Marshall/Networks/cps373-assignments/04-topology/include/router.hpp
+
